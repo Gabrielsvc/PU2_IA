@@ -18,6 +18,11 @@ X = X/np.amax(X, axis=0)
 Y = Y/100
 teste = teste/np.amax(teste, axis = 0)
 
+def leitor():
+	with open('metade_dos_dados.csv','r') as arquivo:
+		print(arquivo.readline())
+
+
 class Rede_neural(object):
 	def __init__(self):
 		#Parametros da rede
@@ -61,18 +66,19 @@ class Rede_neural(object):
 		self.backward(X,Y,o)
 
 	def predicao(self):
-		print 'Resultado previsto'
-		print 'Entrada '+str(teste)
-		print 'Saida '+str(self.foward(teste))
+		print ('Resultado previsto')
+		print ('Entrada '+str(teste))
+		print ('Saida '+str(self.foward(teste)))
 
 if __name__ == '__main__':
+
 	RN = Rede_neural()
 	erro = []
-	for i in xrange(1000):
-		print 'Entrada: '+ str(X)
-		print 'Saida: '+ str(RN.foward(X))
-		print 'Esperado: '+str(Y)
-		print 'Erro: '+ str(np.mean(np.square(Y-RN.foward(X))))
+	for i in range(1000):
+		print ('Entrada: '+ str(X))
+		print ('Saida: '+ str(RN.foward(X)))
+		print ('Esperado: '+str(Y))
+		print ('Erro: '+ str(np.mean(np.square(Y-RN.foward(X)))))
 		erro.append(np.sum((np.mean(np.square(Y-RN.foward(X))))))
 		RN.treinamento(X,Y)
 	RN.predicao()
