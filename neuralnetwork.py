@@ -44,6 +44,8 @@ X = X/np.amax(X, axis=0)
 Y = Y/100
 teste = teste/np.amax(teste, axis = 0)
 
+
+
 def leitor():
 	with open('metade dos dados.csv','r') as arquivo:
 		for linha in arquivo:
@@ -51,8 +53,59 @@ def leitor():
 			trata_linha(linha_lida)
 
 def trata_linha(linha):
+	Entrada_NN = []
 	#Tratamento primeiro valor: generos do filme assistido
+	byte = trata_generos(linha[0])
+	Entrada_NN.append(byte)
 
+	#Tratamento do segundo valor: filhos 1 se sim 0 se nao
+	Entrada_NN.append(linha[1])
+	
+	#Tratamento do terceiro valor: Ferias 1 se sim 0 se nao
+	Entrada_NN.append(linha[2])
+
+	#Tratamento do quarto valor: Filme
+	byte = trata_generos(linha[3])
+	Entrada_NN.append(byte)
+
+	#Tratamento do quinto valor: fim de semana 0 se sim 1 se nao
+	Entrada_NN.append(linha[4])
+
+	#Tratamento do sexto valor ao 13 notas de cada genero
+	Entrada_NN.append(linha[5])
+	Entrada_NN.append(linha[6])
+	Entrada_NN.append(linha[7])
+	Entrada_NN.append(linha[8])
+	Entrada_NN.append(linha[9])
+	Entrada_NN.append(linha[10])
+	Entrada_NN.append(linha[11])
+	Entrada_NN.append(linha[12])
+
+	with open("dados_tratados.csv","a") as arquivo:
+		arquivo.write(str(Entrada_NN)+"\n")
+
+
+
+def trata_generos(lista_generos):
+	byte = [0,0,0,0,0,0,0,0]
+	if ("Acao" in lista_generos):
+		byte[0] = 1
+	if ("Aventura" in lista_generos):
+		byte[1] = 1
+	if ("Comedia" in lista_generos):
+		byte[2] = 1
+	if ("Romance" in lista_generos):
+		byte[3] = 1
+	if ("Terror" in lista_generos):
+		byte[4] = 1
+	if ("Suspense" in lista_generos):
+		byte[5] = 1
+	if ("Animacao" in lista_generos):
+		byte[6] = 1
+	if ("Drama" in lista_generos):
+		byte[7] = 1
+	byte =int(''.join(str(e) for e in byte),2)
+	return byte
 
 class Rede_neural(object):
 	def __init__(self):
