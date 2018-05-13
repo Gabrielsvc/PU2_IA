@@ -46,7 +46,12 @@ teste = teste/np.amax(teste, axis = 0)
 
 def leitor():
 	with open('metade dos dados.csv','r') as arquivo:
-		print(arquivo.readline())
+		for linha in arquivo:
+			linha_lida = linha.split(",")
+			trata_linha(linha_lida)
+
+def trata_linha(linha):
+	#Tratamento primeiro valor: generos do filme assistido
 
 
 class Rede_neural(object):
