@@ -18,11 +18,6 @@ X = X/np.amax(X, axis=0)
 Y = Y/100
 teste = teste/np.amax(teste, axis = 0)
 
-def leitor():
-	with open('metade_dos_dados.csv','r') as arquivo:
-		print(arquivo.readline())
-
-
 class Rede_neural(object):
 	def __init__(self):
 		#Parametros da rede

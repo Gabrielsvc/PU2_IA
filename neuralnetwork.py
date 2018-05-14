@@ -168,12 +168,15 @@ if __name__ == '__main__':
 		erro.append(np.sum((np.mean(np.square(Y-Rede_TOP.Passo_Frente(X))))))
 		Rede_TOP.treinamento(X,Y)
 
-	plt.plot(erro)
-	plt.show()
+	#plt.plot(erro)
+	#plt.show()
 	
 	Resultados_teste = Rede_TOP.Passo_Frente(Teste)
 	erros_teste = []
 	for i in range(0,len(Resultados_teste)-1):
+		print("Resultado esperado: " + str(Teste_saida_esperada[i]))
+		print("Resultado obtido: "+ str(Resultados_teste[i]))
+		print("--------------------------------------")
 		erro_teste = np.sum(Resultados_teste[i] - Teste_saida_esperada[i])
 		erros_teste.append(erro_teste)
 	plt.plot(erros_teste)
