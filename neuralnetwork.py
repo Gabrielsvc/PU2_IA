@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import numpy as np
+from numpy import array
 import matplotlib
 import matplotlib.pyplot as plt 
 
@@ -26,25 +27,17 @@ Notas para cada genero
 
 #Parametros
 '''
+O que fazer com o bias??
 Numero de camadas ocultas = 1
-Numero de saidas de cada camada = 
-Funcao de ativacao = 
-Batch ou online = 
-Numero de iteracoes de treinamento =
-Criterio de parada = 
+Numero de saidas de cada camada = 5,6,8
+Funcao de ativacao = sigmoide
+Batch ou online =  online
+Numero de iteracoes de treinamento = 1000
+Criterio de parada = erro < 10^-2 na nota
 '''
 
-
-X = np.array(([2,9],[1,5],[3,6]), dtype = float)
-Y = np.array(([92],[86],[89]), dtype = float)
-teste = np.array(([4,8]), dtype = float)
-
-
-X = X/np.amax(X, axis=0)
-Y = Y/100
-teste = teste/np.amax(teste, axis = 0)
-
-
+Entradas = []
+Saida_esperada = []
 
 def leitor():
 	with open('metade dos dados.csv','r') as arquivo:
@@ -52,37 +45,36 @@ def leitor():
 			linha_lida = linha.split(",")
 			trata_linha(linha_lida)
 
+
 def trata_linha(linha):
 	Entrada_NN = []
+	#Bias ?
+	#Entrada_NN.append(-1)
+
 	#Tratamento primeiro valor: generos do filme assistido
 	byte = trata_generos(linha[0])
 	Entrada_NN.append(byte)
 
 	#Tratamento do segundo valor: filhos 1 se sim 0 se nao
-	Entrada_NN.append(linha[1])
+	Entrada_NN.append(float(linha[1]))
 	
 	#Tratamento do terceiro valor: Ferias 1 se sim 0 se nao
-	Entrada_NN.append(linha[2])
+	Entrada_NN.append(float(linha[2]))
 
 	#Tratamento do quarto valor: Filme
 	byte = trata_generos(linha[3])
 	Entrada_NN.append(byte)
 
 	#Tratamento do quinto valor: fim de semana 0 se sim 1 se nao
-	Entrada_NN.append(linha[4])
+	Entrada_NN.append(float(linha[4]))
 
 	#Tratamento do sexto valor ao 13 notas de cada genero
-	Entrada_NN.append(linha[5])
-	Entrada_NN.append(linha[6])
-	Entrada_NN.append(linha[7])
-	Entrada_NN.append(linha[8])
-	Entrada_NN.append(linha[9])
-	Entrada_NN.append(linha[10])
-	Entrada_NN.append(linha[11])
-	Entrada_NN.append(linha[12])
+	temp_list =[]
+	for x in range(5,13):
+		temp_list.append(float(linha[x]))
 
-	with open("dados_tratados.csv","a") as arquivo:
-		arquivo.write(str(Entrada_NN)+"\n")
+	Saida_esperada.append(temp_list)
+	Entradas.append(Entrada_NN)
 
 
 
@@ -109,54 +101,49 @@ def trata_generos(lista_generos):
 
 class Rede_neural(object):
 	def __init__(self):
-		#Parametros da rede
-		self.inputSize = 2
-		self.outputSize = 1
-		self.hiddenSize = 3
+		#Tamanho das camadas
+		self.TamEntrada = 5
+		self.TamOculta = 6
+		self.TamSaida = 8
 
 		#Pesos inicializados aleatoriamente
-		self.W1 = np.random.randn(self.inputSize,self.hiddenSize) #Camada de entrada
-		self.W2 = np.random.randn(self.hiddenSize,self.outputSize) #Camada oculta
+		self.W1 = np.random.randn(self.TamEntrada,self.TamOculta) #Camada de entrada
+		self.W2 = np.random.randn(self.TamOculta,self.TamSaida) #Camada oculta
 
-		#Passo para frente
+	#Passo para frente
+	def Passo_Frente(self,X):
+		self.z = np.dot(X,self.W1)
+		self.z2 = self.func_at(self.z)
+		self.z3 = np.dot(self.z2,self.W2)
+		saida = self.func_at(self.z3)
+		return saida
 
-	def foward(self,X):
-		self.z = np.dot(X,self.W1) # Multiplicando entrada pelos pesos
-		self.z2 = self.sigmoid(self.z) # Passando pela funcao de ativacao
-		self.z3 = np.dot(self.z2,self.W2) #Passando pela camada oculta
-		o = self.sigmoid(self.z3) #Funcao de ativacao final
-		return o
+	def func_at(self, x):
+		#sigmoide
+		return 1/(1+np.exp(-x))
 
-	def sigmoid(self, s):
-		return 1/(1+np.exp(-s))
+	def func_at_derivada(self,x):
+		return x*(1-x)
 
-		#Passo para Trás
-	def sigmoid_derivada(self,s):
-		return s*(1-s)
+	def Passo_tras(self,X,Y,saida):
+		self.saida_erro = Y - saida
+		self.saida_derivada = self.func_at_derivada(saida)
 
-	def backward(self, X, Y, o):
-		self.o_erro = Y - o #Erro
-		self.o_delta = self.o_erro * self.sigmoid_derivada(o) # Derivada da sigmoide
+		self.gradiente = saida_erro*saida_derivada
+		self.variacao_peso = Passo_aprendizado*gradiente*z2 + self.W2
 
-		self.z2_error = self.o_delta.dot(self.W2.T) #Erro na camada oculta
-		self.z2_delta = self.z2_error * self.sigmoid_derivada(self.z2) #Aplicando derivada da sigmoide ao erro em z2
 
-		self.W1 += X.T.dot(self.z2_delta) #ajustando os pesos da primeira camada
-		self.W2 += self.z2.T.dot(self.o_delta) #ajustando os pesos da camada oculta
-
-	#Treinamento
-	def treinamento(self,X,Y):
-		o = self.foward(X)
-		self.backward(X,Y,o)
-
-	def predicao(self):
-		print ('Resultado previsto')
-		print ('Entrada '+str(teste))
-		print ('Saida '+str(self.foward(teste)))
 
 if __name__ == '__main__':
 	leitor()
+	X = array(Entradas)
+	Y = array(Saida_esperada)
+	Rede_TOP = Rede_neural()
+	saida = Rede_TOP.Passo_Frente(X)
 
+	print(X)
+	print(Y)
+	print(saida)
 
 
 #Teste da rede neural
