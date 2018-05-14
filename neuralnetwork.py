@@ -2,6 +2,7 @@
 # encoding: utf-8
 import numpy as np
 from numpy import array
+import random
 import matplotlib
 import matplotlib.pyplot as plt 
 
@@ -37,7 +38,7 @@ Passo de Aprendizado = 0.5
 Criterio de parada = erro < 10^-2 na nota
 '''
 
-Passo_aprendizado = 0.5
+Passo_aprendizado = 0.01
 Entradas = []
 Saida_esperada = []
 Teste =[]
@@ -142,15 +143,9 @@ class Rede_neural(object):
 		saida = self.Passo_Frente(X)
 		self.Passo_tras(X,Y,saida)
 
-	def predicao(self):
-		print("Resultado")
-		print("Entradas: "+str(Teste))
-		print("Saida: "+str(self.Passo_Frente(Teste)))
-
-
-
 if __name__ == '__main__':
 	leitor()
+	# Shuffle : Entradas = random.shuffle(Entradas)
 	Teste = Entradas[31:51]
 	Teste_saida_esperada = Saida_esperada[31:51]
 	
@@ -169,7 +164,7 @@ if __name__ == '__main__':
 
 	Rede_TOP = Rede_neural()
 	erro = []
-	for i in range(10000):
+	for i in range(100000):
 		erro.append(np.sum((np.mean(np.square(Y-Rede_TOP.Passo_Frente(X))))))
 		Rede_TOP.treinamento(X,Y)
 
@@ -178,9 +173,8 @@ if __name__ == '__main__':
 	
 	Resultados_teste = Rede_TOP.Passo_Frente(Teste)
 	erros_teste = []
-	for i in Resultados_teste:
-		print(Resultados_teste)
-		erro_teste = np.sum(Resultados_teste - Teste_saida_esperada)
+	for i in range(0,len(Resultados_teste)-1):
+		erro_teste = np.sum(Resultados_teste[i] - Teste_saida_esperada[i])
 		erros_teste.append(erro_teste)
 	plt.plot(erros_teste)
 	plt.show()
