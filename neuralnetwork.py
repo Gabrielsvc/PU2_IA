@@ -33,11 +33,14 @@ Numero de saidas de cada camada = 5,6,8
 Funcao de ativacao = sigmoide
 Batch ou online =  online
 Numero de iteracoes de treinamento = 1000
+Passo de Aprendizado = 0.5
 Criterio de parada = erro < 10^-2 na nota
 '''
 
+Passo_aprendizado = 0.5
 Entradas = []
 Saida_esperada = []
+Teste =[]
 
 def leitor():
 	with open('metade dos dados.csv','r') as arquivo:
@@ -75,8 +78,6 @@ def trata_linha(linha):
 
 	Saida_esperada.append(temp_list)
 	Entradas.append(Entrada_NN)
-
-
 
 def trata_generos(lista_generos):
 	byte = [0,0,0,0,0,0,0,0]
@@ -126,26 +127,64 @@ class Rede_neural(object):
 		return x*(1-x)
 
 	def Passo_tras(self,X,Y,saida):
+		#Camada de saida
 		self.saida_erro = Y - saida
-		self.saida_derivada = self.func_at_derivada(saida)
+		self.gradiente = self.saida_erro*self.func_at_derivada(saida)
 
-		self.gradiente = saida_erro*saida_derivada
-		self.variacao_peso = Passo_aprendizado*gradiente*z2 + self.W2
+		#Camada oculta
+		self.z2_erro = self.gradiente.dot(self.W2.T)
+		self.gradiente_oculto =  self.z2_erro * self.func_at_derivada(self.z2)
+		
+		self.W1 += Passo_aprendizado*(X.T.dot(self.gradiente_oculto))
+		self.W2 += Passo_aprendizado*(self.z2.T.dot(self.gradiente))
+	
+	def treinamento(self,X,Y):
+		saida = self.Passo_Frente(X)
+		self.Passo_tras(X,Y,saida)
+
+	def predicao(self):
+		print("Resultado")
+		print("Entradas: "+str(Teste))
+		print("Saida: "+str(self.Passo_Frente(Teste)))
 
 
 
 if __name__ == '__main__':
 	leitor()
+	Teste = Entradas[31:51]
+	Teste_saida_esperada = Saida_esperada[31:51]
+	
+	Entradas = Entradas[0:31]
+	Saida_esperada = Saida_esperada[0:31]
+
+	Teste = array(Teste)
+	Teste_saida_esperada = array(Teste_saida_esperada)
+	Teste = Teste/np.amax(Teste,axis = 0)
+	Teste_saida_esperada = Teste_saida_esperada/np.amax(Teste_saida_esperada,axis = 0)
+
 	X = array(Entradas)
 	Y = array(Saida_esperada)
+	X = X/np.amax(X, axis=0)
+	Y = Y/np.amax(Y, axis=0)
+
 	Rede_TOP = Rede_neural()
-	saida = Rede_TOP.Passo_Frente(X)
+	erro = []
+	for i in range(10000):
+		erro.append(np.sum((np.mean(np.square(Y-Rede_TOP.Passo_Frente(X))))))
+		Rede_TOP.treinamento(X,Y)
 
-	print(X)
-	print(Y)
-	print(saida)
-
-
+	plt.plot(erro)
+	plt.show()
+	
+	Resultados_teste = Rede_TOP.Passo_Frente(Teste)
+	erros_teste = []
+	for i in Resultados_teste:
+		print(Resultados_teste)
+		erro_teste = np.sum(Resultados_teste - Teste_saida_esperada)
+		erros_teste.append(erro_teste)
+	plt.plot(erros_teste)
+	plt.show()
+	
 #Teste da rede neural
 """
 	RN = Rede_neural()
